@@ -47,16 +47,24 @@ class UserRepositoryImpl(private val database: Database): UserRepository {
         }
     }
 
-    override suspend fun studentIDExists(stdID: StudentID): Boolean {
+    override suspend fun read(studentID: StudentID): User? {
         return dbQuery {
-            Users.select { Users.studentID eq stdID }
+            Users.select { Users.studentID eq studentID }
+                .map { User(it[Users.id], it[Users.studentID], it[Users.name], it[Users.pwHash]) }
+                .singleOrNull()
+        }
+    }
+
+    override suspend fun studentIDExists(studentID: StudentID): Boolean {
+        return dbQuery {
+            Users.select { Users.studentID eq studentID }
                 .singleOrNull()
         } != null
     }
 
-    override suspend fun checkAuth(stdID: StudentID, password: String): Boolean {
+    override suspend fun checkAuth(studentID: StudentID, password: String): Boolean {
         val query = dbQuery {
-            Users.select { Users.studentID eq stdID }
+            Users.select { Users.studentID eq studentID }
                 .singleOrNull()
         } ?: return false
 

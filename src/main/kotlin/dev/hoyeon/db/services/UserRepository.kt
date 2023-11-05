@@ -12,9 +12,11 @@ interface UserRepository {
 
     suspend fun read(id: UUID): User?
 
-    suspend fun studentIDExists(stdID: StudentID): Boolean
+    suspend fun read(studentID: StudentID): User?
 
-    suspend fun checkAuth(stdID: StudentID, password: String): Boolean
+    suspend fun studentIDExists(studentID: StudentID): Boolean
+
+    suspend fun checkAuth(studentID: StudentID, password: String): Boolean
 
     suspend fun update(id: UUID, user: User)
 

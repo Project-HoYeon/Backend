@@ -1,9 +1,9 @@
 package dev.hoyeon.routes
 
 import dev.hoyeon.HOST_API_URL
-import dev.hoyeon.HOST_URL
 import dev.hoyeon.auth.EmailSender
 import dev.hoyeon.auth.EmailValidateSession
+import dev.hoyeon.cypher.JwtTokenGenerator
 import dev.hoyeon.cypher.SHA256
 import dev.hoyeon.db.services.UserRepository
 import dev.hoyeon.objects.StudentID
@@ -19,7 +19,6 @@ import java.io.BufferedReader
 import java.io.InputStream
 import java.net.URLEncoder
 import java.util.*
-
 
 fun Route.handleAuth() {
     route("/auth") {
@@ -39,7 +38,11 @@ fun Route.handleAuth() {
                 return@post
             }
             // TODO: JWT Token generation
-            call.respond(HttpStatusCode.OK, ":)")
+            val user = userRepo.read(studentID)!!
+            val token = JwtTokenGenerator.generateToken(user)
+            call.respond(HttpStatusCode.OK, hashMapOf(
+                "token" to token
+            ))
         }
 
         post("/register") {
