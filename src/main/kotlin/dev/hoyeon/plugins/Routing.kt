@@ -1,6 +1,7 @@
 package dev.hoyeon.plugins
 
 import dev.hoyeon.routes.handleAuth
+import dev.hoyeon.routes.handlePost
 import dev.hoyeon.routes.handleUser
 import io.ktor.http.*
 import io.ktor.resources.*
@@ -25,6 +26,7 @@ fun Application.configureRouting() {
         //}
         handleUser()
         handleAuth()
+        handlePost()
         get("/") {
             call.respondText("Hello World!")
         }

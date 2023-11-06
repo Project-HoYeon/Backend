@@ -1,16 +1,25 @@
 package dev.hoyeon.db.services
 
 import dev.hoyeon.objects.Post
-import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
+import dev.hoyeon.objects.PostID
+import java.util.UUID
 
 interface PostRepository {
 
     suspend fun <T> dbQuery(block: suspend () -> T): T
 
-    suspend fun create(post: Post)
+    suspend fun create(
+        authorID    : UUID,
+        authorName  : String,
+        title       : String,
+        content     : String,
+        isAnonymous : Boolean,
+        writtenAt   : Long,
+    ): PostID
+
+    suspend fun read(postID: PostID): Post?
+
+    suspend fun readAll(from: Long, limit: Int): List<Post>
+
+    suspend fun delete(postID: PostID)
 }
