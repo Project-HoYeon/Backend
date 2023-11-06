@@ -85,7 +85,7 @@ fun Route.handleAuth() {
         }
 
         get("/validate") {
-            val id = call.receiveParameters()["id"]?.let(UUID::fromString)
+            val id = call.request.queryParameters["id"]?.let(UUID::fromString)
             if (id == null) {
                 call.respond(HttpStatusCode.NotFound)
                 return@get
