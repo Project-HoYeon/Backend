@@ -22,19 +22,22 @@ import java.util.*
 
 fun Route.handleAuth() {
     route("/auth") {
-
         post("/login") {
             val request = call.receive<LoginRequest>()
             val studentID = request.id.toIntOrNull()
             if (studentID == null) {
-                call.respond(HttpStatusCode.Unauthorized, "ID_PW_MISMATCH")
+                call.respond(HttpStatusCode.Unauthorized, hashMapOf(
+                    "message" to "ID_PW_MISMATCH"
+                ))
                 return@post
             }
 
             val userRepo = getKoinInstance<UserRepository>()
             val isValid = userRepo.checkAuth(studentID, request.password)
             if (!isValid) {
-                call.respond(HttpStatusCode.Unauthorized, "ID_PW_MISMATCH")
+                call.respond(HttpStatusCode.Unauthorized, hashMapOf(
+                    "message" to "ID_PW_MISMATCH"
+                ))
                 return@post
             }
             // TODO: JWT Token generation
@@ -49,23 +52,31 @@ fun Route.handleAuth() {
             val request = call.receive<RegisterRequest>()
             val studentID = request.id.toIntOrNull()
             if (studentID == null) {
-                call.respond(HttpStatusCode.BadRequest, "INVALID_ID_FORMAT")
+                call.respond(HttpStatusCode.BadRequest, hashMapOf(
+                    "message" to "INVALID_ID_FORMAT"
+                ))
                 return@post
             }
 
             val userRepo = getKoinInstance<UserRepository>()
             val idExists = userRepo.studentIDExists(studentID)
             if (idExists) {
-                call.respond(HttpStatusCode.Conflict, "STD_ID_CONFLICT")
+                call.respond(HttpStatusCode.Conflict, hashMapOf(
+                    "message" to "STD_ID_CONFLICT"
+                ))
                 return@post
             }
 
             if (!EmailValidateSession.isIDValidated(studentID)) {
                 if (EmailValidateSession.hasSessionOfID(studentID))
-                    call.respond(HttpStatusCode.Unauthorized, "EMAIL_AUTH_NOT_COMPLETED")
+                    call.respond(HttpStatusCode.Unauthorized, hashMapOf(
+                        "message" to "EMAIL_AUTH_NOT_COMPLETED"
+                    ))
                 else {
                     sendValidateMail(studentID)
-                    call.respond(HttpStatusCode.Accepted, "AUTH_MAIL_SENT")
+                    call.respond(HttpStatusCode.Accepted, hashMapOf(
+                        "message" to "AUTH_MAIL_SENT"
+                    ))
                 }
                 return@post
             }
