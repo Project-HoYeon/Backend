@@ -9,6 +9,7 @@ import dev.hoyeon.db.services.UserRepository
 import dev.hoyeon.objects.StudentID
 import dev.hoyeon.objects.User
 import dev.hoyeon.utils.getKoinInstance
+import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -19,6 +20,8 @@ import java.io.BufferedReader
 import java.io.InputStream
 import java.net.URLEncoder
 import java.util.*
+
+private val dotenv: Dotenv = getKoinInstance()
 
 fun Route.handleAuth() {
     route("/auth") {
@@ -42,9 +45,21 @@ fun Route.handleAuth() {
             }
             // TODO: JWT Token generation
             val user = userRepo.read(studentID)!!
-            val token = JwtTokenGenerator.generateToken(user)
+            val tokenInfo = JwtTokenGenerator.generateToken(user)
+
+            val cookieName = dotenv["FGP_TOKEN_NAME", "_Token-Fgp"]
+            call.response.cookies.append(
+                name = cookieName,
+                value = tokenInfo.fingerprint,
+                httpOnly = true,
+                secure = cookieName.startsWith("__Secure-"),
+                domain = dotenv["DOMAIN", "localhost"],
+                extensions = mapOf(
+                    "SameSite" to "Strict"
+                )
+            )
             call.respond(HttpStatusCode.OK, hashMapOf(
-                "token" to token
+                "token" to tokenInfo.token
             ))
         }
 
