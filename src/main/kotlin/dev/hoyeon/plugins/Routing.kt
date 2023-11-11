@@ -3,10 +3,11 @@ package dev.hoyeon.plugins
 import dev.hoyeon.routes.handleAuth
 import dev.hoyeon.routes.handlePost
 import dev.hoyeon.routes.handleUser
+import dev.hoyeon.utils.getKoinInstance
+import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
-import io.ktor.server.http.content.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.resources.*
 import io.ktor.server.resources.Resources
@@ -15,6 +16,8 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 
 fun Application.configureRouting() {
+    val dotenv = getKoinInstance<Dotenv>()
+
     install(Resources)
     install(StatusPages) {
         exception<Throwable> { call, cause ->
@@ -24,15 +27,18 @@ fun Application.configureRouting() {
     routing {
         //route("/hoyeon/api/v1") {
         //}
-        handleUser()
-        handleAuth()
-        handlePost()
-        get("/") {
-            call.respondText("Hello World!")
-        }
-        get<Articles> { article ->
-            // Get all articles ...
-            call.respond("List of articles sorted starting from ${article.sort}")
+
+        route(dotenv["BASE_ROUTE_PATH", "/"]) {
+            handleUser()
+            handleAuth()
+            handlePost()
+            get("/") {
+                call.respondText("Hello World!")
+            }
+            get<Articles> { article ->
+                // Get all articles ...
+                call.respond("List of articles sorted starting from ${article.sort}")
+            }
         }
     }
 }
