@@ -1,6 +1,5 @@
 package dev.hoyeon.routes
 
-import dev.hoyeon.HOST_API_URL
 import dev.hoyeon.auth.EmailSender
 import dev.hoyeon.auth.EmailValidateSession
 import dev.hoyeon.cypher.JwtTokenGenerator
@@ -22,6 +21,8 @@ import java.net.URLEncoder
 import java.util.*
 
 private val dotenv: Dotenv = getKoinInstance()
+
+private val PASSWORD_REGEX = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@\$%^&*-]).{8,}\$".toPattern()
 
 fun Route.handleAuth() {
     route("/auth") {
@@ -69,6 +70,13 @@ fun Route.handleAuth() {
             if (studentID == null) {
                 call.respond(HttpStatusCode.BadRequest, hashMapOf(
                     "message" to "INVALID_ID_FORMAT"
+                ))
+                return@post
+            }
+
+            if (!validatePWFormat(request.password)) {
+                call.respond(HttpStatusCode.NotAcceptable, hashMapOf(
+                    "message" to "BAD_PW_FORMAT"
                 ))
                 return@post
             }
@@ -128,6 +136,14 @@ fun Route.handleAuth() {
     }
 }
 
+private fun validatePWFormat(password: String): Boolean {
+    if (password.length < 10)
+        return false
+    return PASSWORD_REGEX
+        .matcher(password)
+        .matches()
+}
+
 private fun sendValidateMail(studentID: StudentID) {
     val mailContent = Thread.currentThread()
         .contextClassLoader
@@ -137,7 +153,7 @@ private fun sendValidateMail(studentID: StudentID) {
         .readText()
 
     val uuid = EmailValidateSession.createSession(studentID).toString()
-    val url  = "$HOST_API_URL/auth/validate?id=${URLEncoder.encode(uuid, Charsets.UTF_8)}"
+    val url  = dotenv["EMAIL_VAL_EP", "http://localhost:5173/register/validate?id="] + URLEncoder.encode(uuid, Charsets.UTF_8)
     val mailData = EmailSender.EmailData(
         title = "<호연> 이메일 인증을 완료해 주세요.",
         content = mailContent.replace("%TARGET_ADDRESS%", url),
