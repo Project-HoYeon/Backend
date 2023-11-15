@@ -4,12 +4,16 @@ import dev.hoyeon.auth.EmailSender
 import dev.hoyeon.auth.EmailValidateSession
 import dev.hoyeon.db.services.PostRepository
 import dev.hoyeon.db.services.UserRepository
+import dev.hoyeon.objects.ChatUser
 import dev.hoyeon.plugins.*
+import dev.hoyeon.socket.packet.Packet
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
@@ -52,6 +56,21 @@ class ApplicationTest {
 
         val receiverAddr = "$studentID@vision.hoseo.edu"
         EmailSender.sendMail(receiverAddr, mailData)
+    }
+
+    @Test
+    fun `test packet serialization`() {
+        val packet: Packet = Packet.UserJoinPacket(
+            user = ChatUser(
+                id = 10,
+                name = "공부하는 독수리",
+            ),
+        )
+
+        Json {
+            prettyPrint = true
+        }.encodeToString(packet)
+            .also(::println)
     }
 
     private fun startKoin() {
