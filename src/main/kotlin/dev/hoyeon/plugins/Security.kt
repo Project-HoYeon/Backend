@@ -4,8 +4,8 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import dev.hoyeon.cypher.SHA256
 import dev.hoyeon.utils.getKoinInstance
+import dev.hoyeon.utils.isDevelopment
 import io.github.cdimascio.dotenv.Dotenv
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -35,12 +35,14 @@ fun Application.configureSecurity() {
 
                 val fingerprint = request.cookies[dotenv["FGP_TOKEN_NAME", "_Token-Fgp"]]
                     ?.let(SHA256::encrypt)
+
+                println((isDevelopment || payload.getClaim("fgp").asString().equals(fingerprint)))
                 if (
                     payload.audience.contains(jwtAudience) &&
                     payload.getClaim("username").asString().isNotBlank() &&
                     payload.getClaim("userID").asString().isNotBlank() &&
                     payload.getClaim("studentID") != null &&
-                    payload.getClaim("fgp").asString().equals(fingerprint)
+                    (isDevelopment || payload.getClaim("fgp").asString().equals(fingerprint))
                 )
                     JWTPrincipal(credential.payload)
                 else
