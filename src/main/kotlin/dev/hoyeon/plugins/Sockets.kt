@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.serialization.json.Json
 import java.time.Duration
 import java.util.*
-import kotlin.jvm.optionals.getOrElse
 import kotlin.jvm.optionals.getOrNull
 
 private val json = Json {
@@ -49,7 +48,7 @@ fun Application.configureSockets() {
     }
     routing {
         route(dotenv["BASE_ROUTE_PATH", "/"]) {
-            authenticate("jwt") {
+            authenticate("jwt-socket") {
                 route("/chat") {
                     get {
                         call.respond(ChatHandler.getChatLog())

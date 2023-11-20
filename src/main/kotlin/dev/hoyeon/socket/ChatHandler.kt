@@ -2,21 +2,30 @@ package dev.hoyeon.socket
 
 import dev.hoyeon.objects.ChatUser
 import dev.hoyeon.socket.chat.Chat
-import dev.hoyeon.socket.chat.ChatRoom
 import dev.hoyeon.socket.packet.Packet
 import io.github.oshai.kotlinlogging.KotlinLogging
-import java.util.UUID
+import io.ktor.server.websocket.*
 
 private val logger = KotlinLogging.logger {  }
 
 class ChatHandler {
 
-    suspend fun handlePacket(packet: Packet) {
+    private suspend fun handlePacket(packet: Packet) {
         val connection = packet.connection
         when(packet) {
             is Packet.HelloPacket -> {
                 packet.connection.userId = packet.userID
                 logger.debug { "Bound user id ${packet.userID} with conn id #${packet.connection.id}" }
+                connection.session.sendSerialized<Packet>(
+                    Packet.ConnectionInfoPacket(ChatUser.from(connection))
+                )
+
+                val roomId = connection.roomId ?: return
+                val room = ChatRoomManager.getRoomById(roomId).get()
+                room.broadcast(
+                    Packet.UserJoinPacket(ChatUser.from(connection)),
+                    connection.id,
+                )
             }
             is Packet.ChatSentPacket -> {
                 val roomId = connection.roomId ?: return
