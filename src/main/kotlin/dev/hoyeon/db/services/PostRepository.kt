@@ -19,7 +19,7 @@ interface PostRepository {
 
     suspend fun read(postID: PostID): Post?
 
-    suspend fun readAll(from: Long, limit: Int): List<Post>
+    suspend fun readAll(from: Long, limit: Int, contentLength: Int): List<Post>
 
     suspend fun delete(postID: PostID)
 }

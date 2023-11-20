@@ -58,11 +58,11 @@ class PostRepositoryImpl(private val database: Database): PostRepository {
         }
     }
 
-    override suspend fun readAll(from: Long, limit: Int): List<Post> {
+    override suspend fun readAll(from: Long, limit: Int, contentLength: Int): List<Post> {
         return dbQuery {
             Posts.selectAll()
                 .limit(limit, offset = from)
-                .map { it.toPost() }
+                .map { it.toPost(contentLength) }
         }
     }
 
@@ -72,13 +72,18 @@ class PostRepositoryImpl(private val database: Database): PostRepository {
         }
     }
 
-    private fun ResultRow.toPost(): Post =
-        DefaultPost(
+    private fun ResultRow.toPost(contentLength: Int = -1): Post {
+        var content = this[Posts.content]
+        if (contentLength != -1 && content.length > contentLength)
+            content = content.substring(0, contentLength) + "..."
+
+        return DefaultPost(
             id          = this[Posts.postID],
             authorId    = this[Posts.authorID],
             title       = this[Posts.title],
-            content     = this[Posts.content],
+            content     = content,
             writtenAt   = this[Posts.writtenAt],
             isAnonymous = this[Posts.isAnonymous]
         )
+    }
 }

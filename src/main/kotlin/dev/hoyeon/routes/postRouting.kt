@@ -33,7 +33,7 @@ fun Route.handlePost() = authenticate("jwt") {
             }
 
             val repo = getPostRepository()
-            val posts = repo.readAll(from, limit)
+            val posts = repo.readAll(from, limit, 60)
                 .map { post ->
                     if (post.isAnonymous)
                         (post as DefaultPost).toAnonymousPost()
