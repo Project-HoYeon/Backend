@@ -2,7 +2,6 @@ package dev.hoyeon.plugins
 
 import dev.hoyeon.routes.handleAuth
 import dev.hoyeon.routes.handlePost
-import dev.hoyeon.routes.handleUser
 import dev.hoyeon.utils.getKoinInstance
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.http.*
@@ -29,7 +28,6 @@ fun Application.configureRouting() {
         //}
 
         route(dotenv["BASE_ROUTE_PATH", "/"]) {
-            handleUser()
             handleAuth()
             handlePost()
             get("/") {

@@ -5,6 +5,7 @@ import dev.hoyeon.db.services.UserRepository
 import dev.hoyeon.db.services.internal.PostRepositoryImpl
 import dev.hoyeon.db.services.internal.UserRepositoryImpl
 import dev.hoyeon.plugins.*
+import dev.hoyeon.socket.ChatHandler
 import io.github.cdimascio.dotenv.Dotenv
 import io.github.cdimascio.dotenv.dotenv
 import io.ktor.server.application.*
@@ -27,6 +28,7 @@ fun main(args: Array<String>) {
         }
         modules(module)
     }
+    ChatHandler()
 
     io.ktor.server.cio.EngineMain.main(args)
 }
