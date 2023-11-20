@@ -48,11 +48,13 @@ fun Application.configureSockets() {
     }
     routing {
         route(dotenv["BASE_ROUTE_PATH", "/"]) {
-            authenticate("jwt-socket") {
-                route("/chat") {
+            route("/chat") {
+                authenticate("jwt") {
                     get {
                         call.respond(ChatHandler.getChatLog())
                     }
+                }
+                authenticate("jwt-socket") {
                     webSocket("/global") {
                         setupIncoming(isGlobal = true)
                     }
