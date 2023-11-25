@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 typealias StudentID = Int
+typealias UserID    = UUID
 
 @Serializable
 data class User(

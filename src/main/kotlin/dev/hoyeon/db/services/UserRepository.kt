@@ -2,15 +2,15 @@ package dev.hoyeon.db.services
 
 import dev.hoyeon.objects.StudentID
 import dev.hoyeon.objects.User
-import java.util.UUID
+import dev.hoyeon.objects.UserID
 
 interface UserRepository {
 
     suspend fun <T> dbQuery(block: suspend () -> T): T
 
-    suspend fun create(user: User): UUID
+    suspend fun create(user: User): UserID
 
-    suspend fun read(id: UUID): User?
+    suspend fun read(id: UserID): User?
 
     suspend fun read(studentID: StudentID): User?
 
@@ -18,7 +18,7 @@ interface UserRepository {
 
     suspend fun checkAuth(studentID: StudentID, password: String): Boolean
 
-    suspend fun update(id: UUID, user: User)
+    suspend fun update(id: UserID, user: User)
 
-    suspend fun delete(id: UUID)
+    suspend fun delete(id: UserID)
 }

@@ -4,6 +4,7 @@ import dev.hoyeon.cypher.SHA256
 import dev.hoyeon.db.services.UserRepository
 import dev.hoyeon.objects.StudentID
 import dev.hoyeon.objects.User
+import dev.hoyeon.objects.UserID
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -30,7 +31,7 @@ class UserRepositoryImpl(private val database: Database): UserRepository {
     override suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
-    override suspend fun create(user: User): UUID = dbQuery {
+    override suspend fun create(user: User): UserID = dbQuery {
         Users.insert {
             it[id] = user.id
             it[name] = user.name
@@ -39,7 +40,7 @@ class UserRepositoryImpl(private val database: Database): UserRepository {
         }[Users.id]
     }
 
-    override suspend fun read(id: UUID): User? {
+    override suspend fun read(id: UserID): User? {
         return dbQuery {
             Users.select { Users.id eq id }
                 .map { User(it[Users.id], it[Users.studentID], it[Users.name], it[Users.pwHash]) }
@@ -72,7 +73,7 @@ class UserRepositoryImpl(private val database: Database): UserRepository {
         return query[Users.pwHash] == hash
     }
 
-    override suspend fun update(id: UUID, user: User) {
+    override suspend fun update(id: UserID, user: User) {
         dbQuery {
             Users.update({ Users.id eq id }) {
                 it[name] = user.name
@@ -81,7 +82,7 @@ class UserRepositoryImpl(private val database: Database): UserRepository {
         }
     }
 
-    override suspend fun delete(id: UUID) {
+    override suspend fun delete(id: UserID) {
         dbQuery {
             Users.deleteWhere { Users.id.eq(id) }
         }
