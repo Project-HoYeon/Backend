@@ -1,5 +1,6 @@
 package dev.hoyeon.plugins
 
+import dev.hoyeon.db.services.UserRepository
 import dev.hoyeon.objects.ChatUser
 import dev.hoyeon.socket.ChatHandler
 import dev.hoyeon.socket.ChatRoomManager
@@ -74,12 +75,24 @@ private suspend fun WebSocketServerSession.setupIncoming(isGlobal: Boolean) {
         val roomID = call.parameters["id"]!!.let(UUID::fromString)
         val room = ChatRoomManager.getRoomById(roomID).getOrNull()
         if (room == null) {
-            close(reason = CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Invalid room id"))
+            close(reason = CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "INVALID_ROOM_ID"))
             return
         }
         room
     }
-    val conn = Connection(this).also {
+    val userId = call.request.queryParameters["userId"]!!
+        .let(UUID::fromString)
+    val userRepo = getKoinInstance<UserRepository>()
+
+    if (userRepo.read(userId) == null) {
+        close(reason = CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "INVALID_USER_ID"))
+        return
+    }
+
+    room.members.find { it.connection.userId == userId }?.connection
+        ?.purge(CloseReason(CloseReason.Codes.GOING_AWAY, "SWITCH_TO_NEW"))
+
+    val conn = Connection(userId, this).also {
         it.roomId = room.id
     }
     room.members += ChatRoom.ConnectionUser(

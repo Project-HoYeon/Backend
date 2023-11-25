@@ -14,7 +14,7 @@ class ChatHandler {
         val connection = packet.connection
         when(packet) {
             is Packet.HelloPacket -> {
-                packet.connection.userId = packet.userID
+                //packet.connection.userId = packet.userID
                 logger.debug { "Bound user id ${packet.userID} with conn id #${packet.connection.id}" }
                 connection.session.sendSerialized<Packet>(
                     Packet.ConnectionInfoPacket(ChatUser.from(connection))
